@@ -73,7 +73,7 @@ The robot supports both manual control and autonomous path execution. It also in
 | UART | Debug output and data logging |
 | ADC | Sensor measurement |
 | PWM | Motor speed control |
-
+3333
 ---
 
 ## System Architecture
