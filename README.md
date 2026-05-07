@@ -134,4 +134,6 @@ This project mainly uses two coding software:
 
 1. CrossIDE --- This software is used to load and flash C code into those two microcontroller
 2. Visual Studio Code --- Mainly used to write and run Python
+3.
+
 
