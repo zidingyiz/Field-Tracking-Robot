@@ -1,6 +1,6 @@
 # Field-Tracking Robot
 
-An autonomous field-tracking robot developed for ELEC291. The robot uses three inductive sensors to detect a hidden track, controls two DC motors through an H-bridge driver, and receives commands from an IR remote. The project focuses on embedded control, sensor-based decision making, finite-state machine design, and hardware/software debugging.
+An autonomous field-tracking robot developed for ELEC 291. The robot uses inductive sensors to detect a hidden guide wire, controls two DC motors through an H-bridge driver, and supports both manual control and autonomous path execution.
 
 > This repository is intended as a portfolio project and technical documentation archive. It is not intended to provide a complete course solution for future students.
 
@@ -8,99 +8,86 @@ An autonomous field-tracking robot developed for ELEC291. The robot uses three i
 
 ## Demo
 
-<!-- Add photos, GIFs, or video links here. -->
-Here is a sample demo video link on YouTube
+Demo video:
 
 https://youtu.be/Fl7GQ-YdvV0
+
+Main functions demonstrated:
 
 - Autonomous track following
 - Intersection detection
 - IR remote control
+- Predefined path execution
 - Scan-mode sensor data collection
-- Offline Python visualization
+- Offline sensor visualization
 
-
-<img width="500" alt="344c1f8ec1f102bb2778c993d5bec6fb" src="https://github.com/user-attachments/assets/91919bde-1515-411d-ad30-743e6c9b6d23" />
-
+<img width="500" alt="Robot demo photo" src="https://github.com/user-attachments/assets/91919bde-1515-411d-ad30-743e6c9b6d23" />
 
 ---
 
 ## Project Overview
 
-The goal of this project was to build a robot capable of following an inductive track and responding to different path commands. The robot uses left, middle, and right inductive sensors to estimate its position relative to the track. Based on the sensor readings, the embedded firmware adjusts motor behavior in real time.
+The goal of this project was to build a small robot that can follow an electromagnetic field track and respond to different path commands. The robot uses left, middle, and right inductive sensors to estimate its position relative to the hidden guide wire. Based on these readings, the embedded firmware adjusts the motor output in real time.
 
-The robot supports both manual control and autonomous path execution. It also includes a scan mode that collects sensor readings over a rectangular area for offline visualization.
+The system supports:
+
+- Manual driving mode
+- Autonomous tracking mode
+- Predefined path modes
+- Obstacle or collision-related behavior using a Time-of-Flight sensor
+- Scan mode for collecting field strength data
+- Serial debugging and data logging
 
 ---
 
 ## Key Features
 
 - Three-inductor sensor system for track detection
-- Real-time ADC sensor reading and threshold-based decision making
+- Real-time ADC sensor reading
 - PWM-based differential motor control
-- Autonomous path-following finite-state machine
+- Autonomous path-following state machine
 - Intersection detection using the middle sensor
 - IR remote command interface
-- Manual control mode
-- Predefined path execution
+- Manual mode and autonomous mode switching
 - Scan mode for sensor data collection
-- Offline Python visualization for sensor mapping
+- CrossIDE-based EFM8 firmware workflow
+
+---
+
+## Repository Structure
+
+```text
+.
+|-- Makefile
+|-- README.md
+|-- LICENSE
+|-- include/
+|   |-- auto_mode.h
+|   |-- buzzer.h
+|   |-- collision.h
+|   |-- joystick.h
+|   |-- motor.h
+|   |-- scanner.h
+|   |-- variable.h
+|   `-- vl53l0x.h
+|-- src/
+|   |-- auto_mode.c
+|   |-- buzzer.c
+|   |-- collision.c
+|   |-- joystick.c
+|   |-- main.c
+|   |-- motor.c
+|   |-- scanner.c
+|   `-- vl53l0x.c
+`-- tests/
+    `-- H-bridgetest.c
+```
 
 ---
 
 ## Hardware
 
-| Component | Description |
-|---|---|
-| EFM8LB1 microcontroller | Main robot controller |
-| STM32-based IR remote | Sends remote commands |
-| Three inductive sensors | Left, middle, and right track sensing |
-| H-bridge motor driver | Controls the two DC motors |
-| DC motors | Differential drive |
-| IR receiver module | Receives remote commands |
-| Battery pack | Robot power source |
-
----
-
-## Software and Tools
-
-| Tool / Language | Purpose |
-|---|---|
-| Embedded C | Robot-side firmware |
-| Python | Sensor data processing and visualization |
-| CrossIDE | EFM8 development environment |
-| PuTTY | Serial logging and debugging |
-| UART | Debug output and data logging |
-| ADC | Sensor measurement |
-| PWM | Motor speed control |
-
----
-
-## System Architecture
-
-The robot reads analog values from the left, middle, and right inductive sensors. The EFM8 microcontroller processes these readings, determines whether the robot is centered, drifting left, drifting right, or approaching an intersection, and then adjusts the two motors accordingly.
-
-Commands from the IR remote can switch the robot between manual mode, autonomous mode, predefined paths. Scan mode is controlled by the UI interface created by Python through the UART.
-
-### Hardware Architecture Diagram
-1. EFM8 chip pin assignment
-
-<img width="500" alt="image" src="https://github.com/user-attachments/assets/226e2f5f-9baf-437c-9e3e-67cb89d7514f" />
-
-
-2. Robot circuit diagram
-<img width="500"  alt="image" src="https://github.com/user-attachments/assets/1ce74342-c994-4c29-be32-acd46a0dd8fc" />
-
-### Software Architecture Diagram
-
-1. Embedded C Design diagram
-<img width="500"  alt="image" src="https://github.com/user-attachments/assets/1d251749-ff4a-4bb6-9b45-1019394fd066" />
-
-## How To Run This project
-
-### Hardeware
-
-1. Make sure you have these electronic components before assembling:
+### Required Components
 
 | Component | Description |
 |---|---|
@@ -116,24 +103,296 @@ Commands from the IR remote can switch the robot between manual mode, autonomous
 | IR receiver module | Receives 38 kHz modulated IR signals on the robot side |
 | Remote controller MCU | Sends manual control and path selection commands |
 | Time-of-Flight distance sensor | Used for collision detection or obstacle avoidance |
-| Battery pack | Powers the robot and motor system ( 4xAA batteries and 1 9V battery) |
+| Battery pack | Powers the robot and motor system (4xAA batteries and 1 9V battery) |
 | Jumper wires / connectors | Used for circuit connections and debugging |
 
-2. Assemble all these components according to your own design and reference diagrams provided in "System Achitecture Diagram" part.
+### Hardware Reference Diagrams
 
-3. Test the H-bridge circuit to make sure your motors go well. You can use the test code <!--file name --> provided in this respositary.
+#### EFM8 Pin Assignment
 
-4.---
+<img width="500" alt="EFM8 pin assignment" src="https://github.com/user-attachments/assets/226e2f5f-9baf-437c-9e3e-67cb89d7514f" />
 
-5.---
+#### Robot Circuit Diagram
 
+<img width="500" alt="Robot circuit diagram" src="https://github.com/user-attachments/assets/1ce74342-c994-4c29-be32-acd46a0dd8fc" />
 
-### Software
+#### Hardware Connection Photo Placeholder
 
-This project mainly uses two coding software:
+<!--
+Add a clear photo of the assembled robot wiring here.
+Suggested image: top-down view showing the EFM8 board, motor driver, motors, sensors, battery pack, IR receiver, and ToF sensor.
+-->
 
-1. CrossIDE --- This software is used to load and flash C code into those two microcontroller
-2. Visual Studio Code --- Mainly used to write and run Python
-3.
+> Image placeholder: complete hardware wiring photo.
 
+---
 
+## Software and Tools
+
+| Tool / Language | Purpose |
+|---|---|
+| Embedded C | Robot-side firmware |
+| CrossIDE | EFM8 development, build, and flashing environment |
+| Makefile | Firmware build configuration |
+| PuTTY / serial terminal | UART logging and debugging |
+| UART | Command input, debug output, and data logging |
+| ADC | Inductive sensor measurement |
+| PWM | Motor speed control |
+| Python / VS Code | Optional sensor data processing and visualization |
+
+### Software Architecture Diagram
+
+<img width="500" alt="Embedded C design diagram" src="https://github.com/user-attachments/assets/1d251749-ff4a-4bb6-9b45-1019394fd066" />
+
+### CrossIDE Screenshot Placeholder
+
+<!--
+Add screenshots here:
+1. Opening the project in CrossIDE
+2. Selecting the correct target/toolchain
+3. Building the project
+4. Flashing main.hex to the EFM8LB1 board
+-->
+
+> Image placeholder: CrossIDE workflow screenshots.
+
+---
+
+## System Architecture
+
+The robot reads analog values from the left, middle, and right inductive sensors. The EFM8 microcontroller processes these readings and determines whether the robot is centered, drifting left, drifting right, or approaching an intersection. The firmware then adjusts the motor speed and direction through PWM output.
+
+Commands from the IR remote can switch the robot between manual mode and autonomous mode. In autonomous mode, the robot can execute predefined paths. Scan mode can be used to collect sensor data through UART for offline visualization.
+
+```text
+Guide wire field
+      |
+      v
+Inductive sensors -> ADC readings -> EFM8 firmware state machine
+                                           |
+                                           v
+                              PWM motor control + path logic
+                                           |
+                                           v
+                                  H-bridge motor driver
+                                           |
+                                           v
+                                      DC motors
+```
+
+---
+
+## How to Run This Project
+
+This project should be prepared in two stages:
+
+1. Hardware connection and basic electrical verification
+2. Software build, flash, and runtime testing
+
+### Step 1: Hardware Connection
+
+Before uploading firmware, assemble and verify the hardware carefully.
+
+#### 1. Prepare the chassis and motors
+
+Mount the two DC gear motors on the chassis. Attach the wheels and make sure both wheels can rotate freely without rubbing against the frame.
+
+<!-- Add a photo of the motor mounting here. -->
+
+> Image placeholder: motor mounting photo.
+
+#### 2. Connect the H-bridge motor driver
+
+Connect the left and right motors to the H-bridge / MOSFET driver circuit. Then connect the driver control pins to the EFM8 output pins according to the circuit diagram.
+
+Before connecting the full robot system, test the H-bridge separately using:
+
+```text
+tests/H-bridgetest.c
+```
+
+This test helps confirm that the motor driver can turn the motor in the expected direction.
+
+<!-- Add a close-up photo of the H-bridge wiring here. -->
+
+> Image placeholder: H-bridge wiring close-up.
+
+#### 3. Connect the inductive sensors
+
+Place the left, middle, and right inductive pickup sensors near the front of the robot. Connect their analog outputs to the EFM8 ADC input pins.
+
+Recommended sensor placement:
+
+```text
+Front of robot
+
+   [Left sensor]   [Middle sensor]   [Right sensor]
+          \              |              /
+           \             |             /
+            -------- Robot body --------
+```
+
+<!-- Add a photo showing the three sensor positions here. -->
+
+> Image placeholder: left, middle, and right sensor placement.
+
+#### 4. Connect the IR receiver and remote controller
+
+Connect the IR receiver module to the EFM8 input pin used by the firmware. The STM32-based remote controller sends commands for mode switching and manual movement.
+
+Suggested checks:
+
+- Confirm the IR receiver has power and ground connected correctly.
+- Confirm the receiver output pin matches the firmware configuration.
+- Test manual commands before running autonomous mode.
+
+<!-- Add a photo of the IR receiver and remote controller here. -->
+
+> Image placeholder: IR receiver and remote controller.
+
+#### 5. Connect the Time-of-Flight sensor
+
+Connect the VL53L0X Time-of-Flight sensor according to the firmware pin definition. This sensor is used for obstacle or collision-related behavior.
+
+<!-- Add a photo of the ToF sensor position here. -->
+
+> Image placeholder: Time-of-Flight sensor position.
+
+#### 6. Connect the battery pack
+
+Connect the battery pack only after the wiring has been checked. Make sure the logic circuit and motor circuit receive the correct voltage levels.
+
+Important checks:
+
+- Check polarity before powering the robot.
+- Confirm the EFM8 board and motor driver share a common ground.
+- Keep the robot lifted during the first motor test so it does not move unexpectedly.
+
+<!-- Add a final complete wiring photo here. -->
+
+> Image placeholder: complete robot wiring before power-on.
+
+### Step 2: Software Setup and Flashing
+
+#### 1. Open the project in CrossIDE
+
+Open CrossIDE and load the firmware project files from this repository. The main firmware entry point is:
+
+```text
+src/main.c
+```
+
+The main build script is:
+
+```text
+Makefile
+```
+
+<!-- Add a screenshot of the project opened in CrossIDE here. -->
+
+> Image placeholder: project opened in CrossIDE.
+
+#### 2. Build the firmware
+
+Build the project in CrossIDE. The expected output file is:
+
+```text
+main.hex
+```
+
+If using the Makefile directly in a compatible environment, the build target is:
+
+```text
+make
+```
+
+Note: the firmware depends on the C51 toolchain used by CrossIDE. A regular desktop C compiler will not compile this project directly.
+
+<!-- Add a screenshot of a successful CrossIDE build here. -->
+
+> Image placeholder: successful CrossIDE build output.
+
+#### 3. Flash the EFM8LB1
+
+Connect the EFM8LB1 board to the computer and flash the generated `main.hex` file using CrossIDE or the EFM8 flashing tool.
+
+The Makefile also includes a flash target:
+
+```text
+make LoadFlash
+```
+
+<!-- Add a screenshot of the flashing process here. -->
+
+> Image placeholder: flashing `main.hex` to the EFM8LB1 board.
+
+#### 4. Run a basic manual-mode test
+
+After flashing, power the robot and test manual commands first. Confirm that:
+
+- Forward and reverse directions are correct.
+- Left and right turning commands are correct.
+- The robot stops when commanded.
+- The IR remote mode switching works.
+
+#### 5. Run autonomous tracking mode
+
+Place the robot near the guide wire field and switch to autonomous mode. The robot should read the inductive sensors, estimate its offset from the track, and adjust the motor outputs.
+
+During testing, tune the motor balance and sensor thresholds if the robot consistently drifts to one side.
+
+#### 6. Optional: collect scan-mode data
+
+If scan mode is enabled, connect a serial terminal or Python script through UART to collect sensor readings. These readings can be used to visualize field strength and tune the robot behavior.
+
+<!-- Add a screenshot of serial output or Python visualization here. -->
+
+> Image placeholder: UART serial output or Python visualization.
+
+---
+
+## Project Limitations
+
+This project works as a practical field-tracking prototype, but it has several important limitations.
+
+### Battery life
+
+The battery pack drains quickly during testing. Motor movement, sensor reading, and repeated debugging can consume power faster than expected. As the battery voltage drops, the motor output and sensor behavior may become less stable.
+
+### Uneven motor power
+
+If the hardware is connected as shown in the hardware section, the left and right motors may not produce perfectly equal power. This can happen because of motor differences, wheel friction, H-bridge behavior, wiring resistance, and battery voltage changes.
+
+Instead of using a more advanced closed-loop control system, this project uses a simpler software compensation method. A motor output balancing function is added in the firmware, such as the left/right PWM helper used in `src/scanner.c`, and its parameters are manually tuned based on the live demo condition.
+
+In other words, if the robot turns slightly left or right when it should go straight, the correction is made directly in code by adjusting the output power ratio between the two motors.
+
+This approach is simple and effective for a course demo, but it is not ideal for long-term reliability. A better version could use wheel encoders, current sensing, or a PID controller to automatically balance motor speed.
+
+### Environment sensitivity
+
+The tracking behavior depends on the strength and shape of the guide wire field. Sensor placement, robot height, wire layout, nearby metal objects, and noise can all affect the ADC readings.
+
+### Manual tuning required
+
+Thresholds, turning delays, recovery pulses, and motor balance parameters may need to be tuned again when the robot is rebuilt, moved to a different track, or powered by a different battery.
+
+---
+
+## Future Improvements
+
+- Add wheel encoders for closed-loop speed control
+- Add automatic motor calibration
+- Improve battery capacity and voltage regulation
+- Add clearer serial debug output
+- Add a full Python visualization tool for scan-mode data
+- Add more photos and wiring diagrams to this README
+- Add a detailed pin mapping table
+
+---
+
+## Conclusion
+
+This project combines embedded firmware, analog sensing, motor control, wireless commands, and hands-on hardware debugging into one complete robot system. The final result is not a polished commercial robot, but it shows the full engineering process: wiring the circuit, reading imperfect sensors, writing control logic, testing on real hardware, and tuning the system until it behaves well enough in the real world.
+
+The most valuable part of this project is that the robot is not only simulated or described. It has to move, fail, drift, lose power, get retuned, and finally follow the track. That makes it a useful record of both the design and the debugging process behind an ELEC 291 field-tracking robot.
