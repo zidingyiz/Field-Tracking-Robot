@@ -1,0 +1,11 @@
+# C51/CrossIDE build outputs
+*.asm
+*.hex
+*.lkr
+*.lst
+*.map
+*.obj
+
+# OS/editor noise
+.DS_Store
+.vscode/
