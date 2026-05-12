@@ -347,7 +347,8 @@ If scan mode is enabled, connect a serial terminal or Python script through UART
 
 <!-- Add a screenshot of serial output or Python visualization here. -->
 
-> Image placeholder: UART serial output or Python visualization.
+> <img width="300" alt="heat map" src="https://github.com/user-attachments/assets/9e1dd77f-877c-4b89-a1cb-bb2c73927e05" />
+
 
 ---
 
