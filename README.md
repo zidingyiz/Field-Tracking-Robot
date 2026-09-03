@@ -21,7 +21,7 @@ Main functions demonstrated:
 - Scan-mode sensor data collection
 - Offline sensor visualization
 
-<img width="500" alt="Robot demo photo" src="https://github.com/user-attachments/assets/91919bde-1515-411d-ad30-743e6c9b6d23" />
+<img width="520" alt="Robot demo photo" src="https://github.com/user-attachments/assets/91919bde-1515-411d-ad30-743e6c9b6d23" />
 
 ---
 
