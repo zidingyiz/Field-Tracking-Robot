@@ -10,7 +10,7 @@ An autonomous field-tracking robot developed for ELEC 291. The robot uses induct
 
 Demo video:
 
-https://youtu.be/Fl7GQ-YdvV0
+[![Project Demo](https://img.shields.io/badge/YouTube-Project_Demo-red?logo=youtube)](https://www.youtube.com/watch?v=Fl7GQ-YdvV0)
 
 Main functions demonstrated:
 
