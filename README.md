@@ -1,6 +1,6 @@
 # Field-Tracking Robot
 
-An autonomous field-tracking robot developed for ELEC 291. The robot uses inductive sensors to detect a hidden guide wire, controls two DC motors through an H-bridge driver, and supports both manual control and autonomous path execution.
+An autonomous field-tracking robot developed for ELEC 291. The robot uses three inductive sensors to detect a hidden guide wire, controls two DC motors through H-bridge drivers, and supports both manual control and autonomous path execution.
 
 > This repository is intended as a portfolio project and technical documentation archive. It is not intended to provide a complete course solution for future students.
 
@@ -34,7 +34,7 @@ The system supports:
 - Manual driving mode
 - Autonomous tracking mode
 - Predefined path modes
-- Obstacle or collision-related behavior using a Time-of-Flight sensor
+- Obstacle detection and stopping behavior using a VL53L0X Time-of-Flight sensor
 - Scan mode for collecting field strength data
 - Serial debugging and data logging
 
@@ -42,7 +42,7 @@ The system supports:
 
 ## Key Features
 
-- Three-inductor sensor system for track detection
+- Three-inductive-sensor system for track detection
 - Real-time ADC sensor reading
 - PWM-based differential motor control
 - Autonomous path-following state machine
@@ -51,6 +51,8 @@ The system supports:
 - Manual mode and autonomous mode switching
 - Scan mode for sensor data collection
 - CrossIDE-based EFM8 firmware workflow
+- VL53L0X Time-of-Flight obstacle detection with audible proximity feedback
+- STM32L051 remote controller for movement, mode, and path commands
 
 ---
 
@@ -61,6 +63,17 @@ The system supports:
 |-- Makefile
 |-- README.md
 |-- LICENSE
+|-- docs/
+|   `-- ELEC291_Field_Tracking_Robot_Report.pdf
+|-- remote-stm32/
+|   |-- __C51.bat
+|   |-- adc.c
+|   |-- adc.h
+|   |-- loadf.bat
+|   |-- main.c
+|   |-- makefile.mac
+|   |-- printADC.mk
+|   `-- sputty.bat
 |-- include/
 |   |-- auto_mode.h
 |   |-- buzzer.h
@@ -102,8 +115,8 @@ The system supports:
 | IR LED transmitter | Used by the remote controller to send commands |
 | IR receiver module | Receives 38 kHz modulated IR signals on the robot side |
 | Remote controller MCU | Sends manual control and path selection commands |
-| Time-of-Flight distance sensor | Used for collision detection or obstacle avoidance |
-| Battery pack | Powers the robot and motor system (4xAA batteries and 1 9V battery) |
+| VL53L0X Time-of-Flight distance sensor | Measures the distance to nearby obstacles for collision detection and audible warning feedback |
+| Battery pack | Powers the robot and motor system (four AA batteries and one 9 V battery) |
 | Jumper wires / connectors | Used for circuit connections and debugging |
 
 ### Hardware Reference Diagrams
@@ -160,9 +173,11 @@ Add screenshots here:
 
 ## System Architecture
 
-The robot reads analog values from the left, middle, and right inductive sensors. The EFM8 microcontroller processes these readings and determines whether the robot is centered, drifting left, drifting right, or approaching an intersection. The firmware then adjusts the motor speed and direction through PWM output.
+The robot reads analog values from the left, middle, and right inductive sensors. The EFM8 microcontroller uses the difference between the left and right readings to estimate the robot's position relative to the guide wire. If the difference exceeds the configured drift threshold, the firmware curves left or right through differential motor control; otherwise, it drives forward. The middle sensor is evaluated separately to detect intersections and advance the selected autonomous path.
 
-Commands from the IR remote can switch the robot between manual mode and autonomous mode. In autonomous mode, the robot can execute predefined paths. Scan mode can be used to collect sensor data through UART for offline visualization.
+The STM32L051 remote controller reads its buttons and joystick, then sends commands over a 38 kHz infrared link to the EFM8 robot controller. These commands control manual movement and select autonomous paths. In autonomous mode, the robot can execute predefined paths. Scan mode can be used to collect sensor data through UART for offline visualization.
+
+The VL53L0X measures distance continuously over I2C using Time-of-Flight ranging. A corrected reading below 100 mm places the robot in a blocked state and stops its normal motion; manual reverse remains available so the robot can back away. The blocked state clears after the reading rises above 130 mm. The buzzer is silent beyond 200 mm, beeps progressively faster from 200 mm down to 100 mm, and sounds continuously at 100 mm or closer.
 
 ```text
 Guide wire field
@@ -238,7 +253,7 @@ Front of robot
 
 #### 4. Connect the IR receiver and remote controller
 
-Connect the IR receiver module to the EFM8 input pin used by the firmware. The STM32-based remote controller sends commands for mode switching and manual movement.
+Connect the IR receiver module to the EFM8 input pin used by the firmware. The STM32L051-based remote controller sends movement, mode, and path-selection commands to the robot.
 
 Suggested checks:
 
@@ -252,7 +267,7 @@ Suggested checks:
 
 #### 5. Connect the Time-of-Flight sensor
 
-Connect the VL53L0X Time-of-Flight sensor according to the firmware pin definition. This sensor is used for obstacle or collision-related behavior.
+Connect the VL53L0X Time-of-Flight sensor according to the firmware pin definition. The EFM8 reads the sensor continuously over I2C, stops normal motion when an obstacle crosses the configured stop threshold, and drives the distance-based buzzer warning.
 
 <!-- Add a photo of the ToF sensor position here. -->
 
@@ -364,7 +379,7 @@ The battery pack drains quickly during testing. Motor movement, sensor reading, 
 
 If the hardware is connected as shown in the hardware section, the left and right motors may not produce perfectly equal power. This can happen because of motor differences, wheel friction, H-bridge behavior, wiring resistance, and battery voltage changes.
 
-Instead of using a more advanced closed-loop control system, this project uses a simpler software compensation method. A motor output balancing function is added in the firmware, such as the left/right PWM helper used in `src/scanner.c`, and its parameters are manually tuned based on the live demo condition.
+Instead of using a more advanced closed-loop control system, this project uses a simpler software compensation method. A motor output balancing function is implemented in the firmware, such as the left/right PWM helper used in `src/scanner.c`, and its parameters are manually tuned for the live demonstration conditions.
 
 In other words, if the robot turns slightly left or right when it should go straight, the correction is made directly in code by adjusting the output power ratio between the two motors.
 
@@ -389,6 +404,16 @@ Thresholds, turning delays, recovery pulses, and motor balance parameters may ne
 - Add a full Python visualization tool for scan-mode data
 - Add more photos and wiring diagrams to this README
 - Add a detailed pin mapping table
+
+---
+
+## Team
+
+- Qijun Zhou
+- How Yee Chaw
+- Yichen Liu
+- Daniel Gu
+- Jacky Zou
 
 ---
 
